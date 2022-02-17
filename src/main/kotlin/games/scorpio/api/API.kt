@@ -2,9 +2,11 @@ package games.scorpio.api
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import games.scorpio.api.config.Configuration
 import games.scorpio.api.route.EndpointType
 import games.scorpio.api.route.Route
 import games.scorpio.api.route.impl.PingRoute
+import games.scorpio.api.route.impl.StatisticsRoute
 import games.scorpio.api.util.JsonTransformer
 import spark.Spark
 import java.util.logging.Logger
@@ -25,10 +27,32 @@ class API {
     init {
         logger.info("Initializing Hypixel Middle Man API")
 
-        Spark.port(90)
+        val configuration = Configuration()
 
-        val routes: List<Route> = arrayListOf(PingRoute())
+        Runtime.getRuntime().addShutdownHook(Thread {
+            configuration.save()
+        })
+
+        Spark.port(configuration.port)
+
+        logger.info("API Port is ${configuration.port}.")
+
+        val routes: List<Route> = arrayListOf(PingRoute(), StatisticsRoute())
         val transformer = JsonTransformer()
+
+        Spark.before("/*") { request, response ->
+            if (request.contentType() != null && (request.contentType() != "application/json" || request.contentType() != "application/json; charset=UTF-8")) {
+                Spark.halt(400, "Bad request")
+            }
+        }
+
+        logger.info("Spark can only read \"application/json\" content type now.")
+
+        Spark.exception(Exception::class.java) { exception, request, response ->
+            logger.warning("Error 500 - " + request.pathInfo() + ", Body: " + request.body())
+        }
+
+        logger.info("Spark exception handler has been setup.")
 
         Spark.path("/api") {
             for (route in routes) {

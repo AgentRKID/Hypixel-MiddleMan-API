@@ -2,7 +2,6 @@ package games.scorpio.api.route
 
 import spark.Request
 import spark.Response
-import java.util.function.BiFunction
 
 open class Route(val routing: String, val transform: Boolean) {
 
