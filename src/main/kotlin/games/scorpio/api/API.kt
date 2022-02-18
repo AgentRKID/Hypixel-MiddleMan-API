@@ -7,9 +7,12 @@ import games.scorpio.api.route.EndpointType
 import games.scorpio.api.route.Route
 import games.scorpio.api.route.impl.PingRoute
 import games.scorpio.api.route.impl.StatisticsRoute
+import games.scorpio.api.util.HttpHandler
 import games.scorpio.api.util.JsonTransformer
+import games.scorpio.api.util.LoggerFormat
 import spark.Spark
 import java.util.logging.Logger
+import kotlin.math.log
 
 class API {
 
@@ -19,6 +22,9 @@ class API {
 
         @JvmStatic
         fun main(args: Array<String>) {
+            logger.useParentHandlers = false
+            logger.addHandler(LoggerFormat())
+
             API()
         }
 
